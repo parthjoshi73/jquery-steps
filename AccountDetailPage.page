@@ -1,0 +1,96 @@
+<apex:page standardController="Account" extensions="AccountDetailPageController"
+    showHeader="true" tabStyle="account">
+    <style>
+        .activeTab {
+            background-color: #236FBD;
+            color: white;
+            background-image: none
+        }
+        
+        .inactiveTab {
+            background-color: lightgrey;
+            color: black;
+            background-image: none
+        }
+
+    </style>
+
+   
+    <apex:form>
+        <apex:actionfunction name="CallFetchOpportunity" action="{!retrieveOpportunity}" rerender="update-Mode" immediate="true">
+            <apex:param id="OppIdToFetch" name="OppId" value="" />
+        </apex:actionfunction>
+        
+        <apex:actionfunction name="CallDeleteOpportunity" action="{!DeleteOpportunity}" rerender="Opportunity-Related-List" immediate="true">
+            <apex:param id="OppIdToDelete" name="OppId" value="" />
+        </apex:actionfunction>
+
+        <apex:pageBlock title="Account Details">
+            <apex:message />
+            <apex:pageBlockSection columns="2" collapsible="false">
+                <apex:outputField value="{!account.Name}" />
+                <apex:outputField value="{!account.Website}" />
+                <apex:outputField value="{!account.Email__c}" />
+                <apex:outputField value="{!account.CreatedDate}" />
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+
+        <!-- Account Details Summary End Here -->
+
+        <!-- Related Opportunity Starts here -->
+
+        <!-- <apex:relatedList subject="{!account}" list="opportunities" /> -->
+            <apex:outputPanel id="Opportunity-Related-List">
+                <apex:pageblock title="Related Opportunities"> 
+                    <apex:pageBlockButtons location="top">
+                        <apex:commandButton value="New Opportunity" action="{!AddNewOpportunity}" rerender="update-Mode,Opportunity-Related-List" status="status" />
+                    </apex:pageBlockButtons>
+                    <apex:pageblocktable value="{!oppList}" var="opp" rendered="{!NOT(ISNULL(oppList))}">
+                        <apex:column>
+                            <apex:facet name="header">Action</apex:facet>
+                            <apex:commandLink onclick="callFetchOpp('{!opp.Id}');return false;" value="Edit"/> &nbsp; &nbsp;
+                            <apex:commandLink onclick="callDeleteOpp('{!opp.Id}');return true;" value="Delete" />
+                        </apex:column>
+                        <apex:column value="{!opp.Name}" />
+                        <apex:column value="{!opp.Account.Name}" />
+                        <apex:column value="{!opp.Type}" />
+                        <apex:column value="{!opp.CloseDate}" />
+                    </apex:pageblocktable>
+                </apex:pageblock>
+            </apex:outputPanel>
+        
+        <!-- Related Opportunity Ends here -->
+    
+        <!-- insert/Update Opportunity Starts here -->
+        <apex:outputPanel id="update-Mode">
+            <apex:pageblock title="Update Opportunities" rendered="{!showEditMode}">
+
+                <apex:pageBlockSection collapsible="true" columns="2">
+                    <apex:inputField value="{!oppObj.Name}" />
+                    <apex:outputfield value="{!oppObj.accountid}" />
+                    <apex:inputField value="{!oppObj.Type}" />
+                    <apex:inputField value="{!oppObj.CloseDate}" />
+                    <apex:inputField value="{!oppObj.StageName}" />
+                </apex:pageBlockSection>
+
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton value="Cancel" action="{!cancelEdit}" rerender="update-Mode" immediate="true" />
+                    <apex:commandButton value="Save" action="{!SaveOpportunity}" rerender="update-Mode,Opportunity-Related-List" status="status" />
+                </apex:pageBlockButtons>
+            </apex:pageblock>
+        </apex:outputPanel>
+        <!-- insert/Update Opportunity Ends here -->
+        
+    </apex:form>
+    <script>
+        function callFetchOpp(OppId) {
+            CallFetchOpportunity(OppId);
+        }
+        
+        function callDeleteOpp(OppId) {
+            CallDeleteOpportunity(OppId);
+        }
+
+    </script>
+
+</apex:page>
